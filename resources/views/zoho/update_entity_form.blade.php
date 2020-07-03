@@ -13,6 +13,14 @@ function htmlFormType($param) {
             return 'text';
     }
 }
+function htmlFormValue($entity,$fieldName) {
+    if(count($entity)>0){
+        if(isset($entity[0]["fields"][$fieldName])){
+            return $entity[0]["fields"][$fieldName];
+        }
+    }
+    return "";
+}
 @endphp
 
 <!DOCTYPE html>
@@ -83,19 +91,25 @@ function htmlFormType($param) {
 
                 <div class="main_content">
                     <h1>Update {{ $entityType }}</h1>
-                    <form action="/api/updateEntity" method="post" target="_blank">
+                    <form action="/api/updateEntity" method="post" name="updateEntity" target="_blank">
                         @csrf
                         <input type="hidden" name="_entityType" value="{{ $entityType }}"/>
+                        <input type="hidden" name="_id" value="{{ $id }}"/>
                         @foreach ($fields as $field)
                             <label for="{{ $field['apiName'] }}">{{ $field['apiName'] }}:</label>
                             @if ($field['type'] === 'picklist')
                                 <select id="{{ $field['apiName'] }}" name="{{ $field['apiName'] }}">
                                     @foreach ($field['pickList'] as $pickList)
-                                        <option value="{{ $pickList['displayValue'] }}">{{ $pickList['displayValue'] }}</option>
+                                        <option value="{{ $pickList['displayValue'] }}"
+                                            @if ($pickList['displayValue'] == htmlFormValue($entity,$field['apiName']))
+                                                selected="selected"
+                                            @endif
+                                        >{{ $pickList['displayValue'] }}</option>
                                     @endforeach
                                 </select><br/><br/>
                             @else
-                                <input type="{{ htmlFormType($field['type']) }}" name="{{ $field['apiName'] }}" value=""
+                                <input type="{{ htmlFormType($field['type']) }}" name="{{ $field['apiName'] }}"
+                                    value="{{ htmlFormValue($entity,$field['apiName']) }}"
                                     @if ($field['isMandatory'])
                                         required
                                     @endif

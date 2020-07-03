@@ -61,8 +61,24 @@ class EntityController extends BaseController
 
     public function updateEntityForm(Request $request){
         $entityType = $request->input('entity');
+        $id = $request->input('id');
         $zohoCRM = new ZohoApi();
         $fields = $zohoCRM->getAllFields($entityType);
-        return view("zoho/create_entity_form")->with("fields", $zohoCRM->getFieldsInfoToArray($fields))->with('entityType', $entityType);
+        $entity = $zohoCRM->getEntity($entityType,$id);
+        if(isset($entity["error"])){ $this->response->setStatusCode(500); return $this->response->respondWithData($entity);}
+        return view("zoho/update_entity_form")
+                    ->with("fields", $zohoCRM->getFieldsInfoToArray($fields))
+                    ->with("entity", $entity)
+                    ->with('entityType', $entityType)
+                    ->with('id', $id);
+    }
+
+    public function updateEntity(Request $request){
+        $entityType = $request->input('_entityType');
+        $id = $request->input('_id');
+        $zohoCRM = new ZohoApi();
+        $response = $zohoCRM->updateEntity($entityType,$id,$request);
+        if(isset($response["error"])){ $this->response->setStatusCode(500); }
+        return $this->response->respondWithData($response);
     }
 }

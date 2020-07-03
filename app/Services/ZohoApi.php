@@ -126,11 +126,13 @@ class ZohoApi {
         $returnRecord = array();
         $returnRecord["id"] = $record->getEntityId();
         $returnRecord["moduleName"] = $record->getModuleApiName();
+        $owner = $record->getOwner();
         $map = $record->getData();
         $returnRecord["fields"] = array();
         foreach ($map as $key => $value) {
             $returnRecord["fields"][$key] = $value;
         }
+        $returnRecord["fields"]["Owner"] = $owner->getId();
         return $returnRecord;
     }
 
@@ -157,6 +159,25 @@ class ZohoApi {
         $moduleIns = ZCRMRestClient::getInstance()->getModuleInstance($entityType); // to get the instance of the module
         $recordids = array($id);
         $responseIn = $moduleIns->deleteRecords($recordids);
+        foreach ($responseIn->getEntityResponses() as $responseIns) {
+            if($responseIns->getStatus() == "error"){
+                return array("error"=>$responseIns->getMessage(),"details"=>$responseIns->getDetails());
+            }else{
+                return array("success"=>$responseIns->getMessage(),"details"=>$responseIns->getDetails());
+            }
+        }
+    }
+
+    public function updateEntity($entityType,$id,$request){
+        $moduleIns=ZCRMRestClient::getInstance()->getModuleInstance($entityType);
+        $records=array();
+        $record=ZCRMRecord::getInstance($entityType,$id);
+        $data = $request->except('_token','_entityType','_id');
+        foreach($data as $key => $value){
+            $record->setFieldValue($key,$value);
+        }
+        $records[] = $record;
+        $responseIn = $moduleIns->updateRecords($records,array());
         foreach ($responseIn->getEntityResponses() as $responseIns) {
             if($responseIns->getStatus() == "error"){
                 return array("error"=>$responseIns->getMessage(),"details"=>$responseIns->getDetails());

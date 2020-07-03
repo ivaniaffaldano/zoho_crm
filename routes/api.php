@@ -21,5 +21,5 @@ use Illuminate\Support\Facades\Route;
 Route::get('/fields', 'EntityController@getFields')->name('getFieldsAPI');
 Route::get('/entity', 'EntityController@getEntity')->name('getEntityAPI');
 Route::post('/entity', 'EntityController@createEntity')->name('createEntityAPI');
-Route::post('/updateEntity', 'EntityController@deleteEntity')->name('updateEntityAPI');
+Route::post('/updateEntity', 'EntityController@updateEntity')->name('updateEntityAPI');
 Route::post('/deleteEntity', 'EntityController@deleteEntity')->name('deleteEntityAPI');
